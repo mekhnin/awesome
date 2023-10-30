@@ -1,0 +1,23 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Containerization with Docker Compose
+        run: docker-compose up -d
+      - name: Endpoint test
+        run: |
+          sleep 10
+          docker run --network=host appropriate/curl -s --header "Content-Type: application/json" -X POST -d '{"key":"value"}'  0.0.0.0:8080
+          docker run --network=host appropriate/curl -s --header "Content-Type: application/json" -X PUT -d '{"key":"value2"}' 0.0.0.0:8080/key
+          docker run --network=host appropriate/curl -s curl 0.0.0.0:8080/key
+
+
